@@ -15,10 +15,16 @@
     <description>Spring Cloud Gateway — reactive API edge service</description>
 
     <dependencies>
-        <!-- iam-common -->
+        <!-- iam-common (exclude servlet deps — gateway is reactive) -->
         <dependency>
             <groupId>com.iam.platform</groupId>
             <artifactId>iam-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring Cloud Gateway (reactive — includes WebFlux) -->
