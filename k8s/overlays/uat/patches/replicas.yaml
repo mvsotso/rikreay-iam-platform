@@ -116,3 +116,17 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-monitoring-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-monitoring-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"

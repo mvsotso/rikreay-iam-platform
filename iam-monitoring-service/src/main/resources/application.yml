@@ -1,0 +1,109 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: iam-monitoring-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import: optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:8888
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/iam_monitoring
+    username: ${POSTGRES_USER:iam_admin}
+    password: ${POSTGRES_PASSWORD:iam_secret_2026}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:iam-platform}
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:iam-platform}/protocol/openid-connect/certs
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URL:http://localhost:9200}
+
+monitoring:
+  services:
+    - name: iam-gateway
+      url: http://${GATEWAY_HOST:localhost}:8081
+    - name: iam-core-service
+      url: http://${CORE_SERVICE_HOST:localhost}:8082
+    - name: iam-tenant-service
+      url: http://${TENANT_SERVICE_HOST:localhost}:8083
+    - name: iam-audit-service
+      url: http://${AUDIT_SERVICE_HOST:localhost}:8084
+    - name: iam-xroad-adapter
+      url: http://${XROAD_ADAPTER_HOST:localhost}:8085
+    - name: iam-admin-service
+      url: http://${ADMIN_SERVICE_HOST:localhost}:8086
+    - name: iam-config-service
+      url: http://${CONFIG_SERVICE_HOST:localhost}:8888
+    - name: iam-notification-service
+      url: http://${NOTIFICATION_SERVICE_HOST:localhost}:8090
+  health-check-interval: 30
+  redis-cache-ttl: 30
+
+app:
+  services:
+    prometheus-url: ${PROMETHEUS_URL:http://localhost:9090}
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+      - http://localhost:3000
+      - http://localhost:5173
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      health-check:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15s
+        permittedNumberOfCallsInHalfOpenState: 3
+      elasticsearch:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+      prometheus:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+
+logging:
+  level:
+    root: INFO
+    com.iam.platform: DEBUG
