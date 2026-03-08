@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - path: patches/replicas.yaml
+
+configMapGenerator:
+  - name: iam-platform-config
+    literals:
+      - postgres-host=postgres
+      - keycloak-url=http://keycloak:8080
+      - kafka-servers=kafka:29092
+      - redis-host=redis
+      - elasticsearch-url=http://elasticsearch:9200
+
+secretGenerator:
+  - name: iam-platform-secrets
+    literals:
+      - postgres-user=iam_admin
+      - postgres-password=iam_secret_2026
+      - redis-password=redis_secret_2026
+      - keycloak-admin-username=admin
+      - keycloak-admin-password=admin

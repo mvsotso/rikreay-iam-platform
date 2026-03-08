@@ -1,0 +1,157 @@
+version: "3.9"
+
+# Service containers — builds and runs all 6 core services
+# Usage: docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
+
+services:
+  iam-config-service:
+    build:
+      context: ..
+      dockerfile: iam-config-service/Dockerfile
+    container_name: iam-config-service
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: iam_admin
+      POSTGRES_PASSWORD: iam_secret_2026
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  iam-gateway:
+    build:
+      context: ..
+      dockerfile: iam-gateway/Dockerfile
+    container_name: iam-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CONFIG_SERVER_HOST: iam-config-service
+      KEYCLOAK_URL: http://keycloak:8080
+      REDIS_HOST: redis
+      REDIS_PASSWORD: redis_secret_2026
+    networks:
+      - iam-network
+    depends_on:
+      - iam-config-service
+      - keycloak
+      - redis
+    restart: unless-stopped
+
+  iam-core-service:
+    build:
+      context: ..
+      dockerfile: iam-core-service/Dockerfile
+    container_name: iam-core-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: iam_admin
+      POSTGRES_PASSWORD: iam_secret_2026
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      - iam-config-service
+      - keycloak
+      - kafka
+    restart: unless-stopped
+
+  iam-tenant-service:
+    build:
+      context: ..
+      dockerfile: iam-tenant-service/Dockerfile
+    container_name: iam-tenant-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: iam_admin
+      POSTGRES_PASSWORD: iam_secret_2026
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      - iam-config-service
+      - keycloak
+      - kafka
+    restart: unless-stopped
+
+  iam-audit-service:
+    build:
+      context: ..
+      dockerfile: iam-audit-service/Dockerfile
+    container_name: iam-audit-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: iam_admin
+      POSTGRES_PASSWORD: iam_secret_2026
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_SERVERS: kafka:29092
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      - iam-config-service
+      - kafka
+      - elasticsearch
+    restart: unless-stopped
+
+  iam-xroad-adapter:
+    build:
+      context: ..
+      dockerfile: iam-xroad-adapter/Dockerfile
+    container_name: iam-xroad-adapter
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: iam_admin
+      POSTGRES_PASSWORD: iam_secret_2026
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_SERVERS: kafka:29092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: redis_secret_2026
+      CORE_SERVICE_URL: http://iam-core-service:8082
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      - iam-config-service
+      - redis
+      - kafka
+    restart: unless-stopped
+
+networks:
+  iam-network:
+    external: true
+    name: docker_iam-network

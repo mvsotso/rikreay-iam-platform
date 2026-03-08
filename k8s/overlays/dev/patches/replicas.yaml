@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-gateway
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-gateway
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-core-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-core-service
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-tenant-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-tenant-service
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-audit-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-audit-service
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-xroad-adapter
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-xroad-adapter
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-config-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-config-service
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "native,dev"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+spec:
+  replicas: 1

@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-xroad-adapter
+  labels:
+    app: iam-xroad-adapter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iam-xroad-adapter
+  template:
+    metadata:
+      labels:
+        app: iam-xroad-adapter
+    spec:
+      containers:
+        - name: iam-xroad-adapter
+          image: rikreay/iam-xroad-adapter:latest
+          ports:
+            - containerPort: 8085
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "iam-config-service"
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-password
+            - name: KEYCLOAK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: keycloak-url
+            - name: KAFKA_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: kafka-servers
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: redis-host
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: redis-password
+            - name: CORE_SERVICE_URL
+              value: "http://iam-core-service:8082"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            initialDelaySeconds: 30
+            periodSeconds: 10

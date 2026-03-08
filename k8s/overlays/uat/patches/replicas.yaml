@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-gateway
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-gateway
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-core-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-core-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-tenant-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-tenant-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-audit-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-audit-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-xroad-adapter
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-xroad-adapter
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-config-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-config-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "native,uat"

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-config-service
+  labels:
+    app: iam-config-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iam-config-service
+  template:
+    metadata:
+      labels:
+        app: iam-config-service
+    spec:
+      containers:
+        - name: iam-config-service
+          image: rikreay/iam-config-service:latest
+          ports:
+            - containerPort: 8888
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "native,prod"
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8888
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8888
+            initialDelaySeconds: 20
+            periodSeconds: 10

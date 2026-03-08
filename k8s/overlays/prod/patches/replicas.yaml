@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-gateway
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-gateway
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-core-service
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-core-service
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-tenant-service
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-tenant-service
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-audit-service
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-audit-service
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-xroad-adapter
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-xroad-adapter
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-config-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-config-service
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "native,prod"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: keycloak
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"

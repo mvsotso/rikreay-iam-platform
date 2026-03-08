@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-audit-service
+  labels:
+    app: iam-audit-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iam-audit-service
+  template:
+    metadata:
+      labels:
+        app: iam-audit-service
+    spec:
+      containers:
+        - name: iam-audit-service
+          image: rikreay/iam-audit-service:latest
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "iam-config-service"
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-password
+            - name: KEYCLOAK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: keycloak-url
+            - name: KAFKA_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: kafka-servers
+            - name: ELASTICSEARCH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: elasticsearch-url
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 10
