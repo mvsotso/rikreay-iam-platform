@@ -81,13 +81,13 @@ class MonitoringServiceTest {
     @DisplayName("Create alert rule should persist and return response")
     void createAlertRule() {
         AlertRuleRequest request = new AlertRuleRequest(
-                "High CPU", "SERVICE_DOWN", 1.0,
+                "High CPU", "SERVICE_DOWN", "1",
                 ChannelType.EMAIL, "iam-core-service", true);
 
         AlertRule saved = AlertRule.builder()
                 .name("High CPU")
                 .condition("SERVICE_DOWN")
-                .threshold(1.0)
+                .threshold("1")
                 .channelType(ChannelType.EMAIL)
                 .serviceTarget("iam-core-service")
                 .enabled(true)
