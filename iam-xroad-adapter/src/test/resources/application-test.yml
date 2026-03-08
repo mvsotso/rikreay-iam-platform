@@ -1,0 +1,41 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  kafka:
+    bootstrap-servers: localhost:9092
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/iam-platform
+          jwk-set-uri: http://localhost:8080/realms/iam-platform/protocol/openid-connect/certs
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+xroad:
+  enabled: true
+  member:
+    instance: KH
+    member-class: GOV
+    member-code: GDT
+    subsystem: TAX-SERVICES
+  routing:
+    core-service-url: http://localhost:8082
+
+logging:
+  level:
+    root: WARN
