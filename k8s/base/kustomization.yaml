@@ -25,6 +25,9 @@ resources:
   - notification-service/deployment.yaml
   - notification-service/service.yaml
   - notification-service/hpa.yaml
+  - admin-service/deployment.yaml
+  - admin-service/service.yaml
+  - admin-service/hpa.yaml
   - keycloak/statefulset.yaml
   - keycloak/service.yaml
 

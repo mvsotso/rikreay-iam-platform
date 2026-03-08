@@ -102,3 +102,17 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "native,uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-admin-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-admin-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
