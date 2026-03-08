@@ -1,0 +1,688 @@
+{
+  "realm": "iam-platform",
+  "displayName": "RikReay IAM Enterprise Platform",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "maxDeltaTimeSeconds": 600,
+  "maxFailureWaitSeconds": 1800,
+  "accessTokenLifespan": 600,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "defaultSignatureAlgorithm": "RS256",
+  "passwordPolicy": "length(8) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and notUsername and passwordHistory(3)",
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "noreply@iam-platform.local",
+    "fromDisplayName": "RikReay IAM Platform",
+    "ssl": "false",
+    "starttls": "false",
+    "auth": "false"
+  },
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "km"],
+  "defaultLocale": "en",
+  "roles": {
+    "realm": [
+      {
+        "name": "iam-admin",
+        "description": "Full platform administrator (Tier 0-1)",
+        "composite": false
+      },
+      {
+        "name": "tenant-admin",
+        "description": "Organization admin — manages their own org (Tier 3)",
+        "composite": false
+      },
+      {
+        "name": "sector-admin",
+        "description": "Sector oversight for one member class GOV/COM/NGO/MUN (Tier 2)",
+        "composite": false
+      },
+      {
+        "name": "service-manager",
+        "description": "Manages X-Road service registrations",
+        "composite": false
+      },
+      {
+        "name": "auditor",
+        "description": "Read-only access to audit logs",
+        "composite": false
+      },
+      {
+        "name": "api-access",
+        "description": "Basic API access (gateway pass-through)",
+        "composite": false
+      },
+      {
+        "name": "internal-user",
+        "description": "Internal staff user",
+        "composite": false
+      },
+      {
+        "name": "external-user",
+        "description": "External citizen/partner user",
+        "composite": false
+      },
+      {
+        "name": "config-admin",
+        "description": "Manage platform configuration and feature flags",
+        "composite": false
+      },
+      {
+        "name": "ops-admin",
+        "description": "Access monitoring dashboards and incident management",
+        "composite": false
+      },
+      {
+        "name": "governance-admin",
+        "description": "Manage access reviews, certifications, policies",
+        "composite": false
+      },
+      {
+        "name": "developer",
+        "description": "Self-service app registration, API docs, sandbox",
+        "composite": false
+      },
+      {
+        "name": "report-viewer",
+        "description": "View compliance and audit reports",
+        "composite": false
+      }
+    ],
+    "client": {
+      "iam-gateway": [
+        {
+          "name": "gateway-admin",
+          "description": "Gateway administration"
+        }
+      ],
+      "iam-core-service": [
+        {
+          "name": "read",
+          "description": "Read access to core APIs"
+        },
+        {
+          "name": "write",
+          "description": "Write access to core APIs"
+        },
+        {
+          "name": "admin",
+          "description": "Admin access to core APIs"
+        }
+      ],
+      "iam-xroad-adapter": [
+        {
+          "name": "xroad-consumer",
+          "description": "Consume X-Road services"
+        },
+        {
+          "name": "xroad-provider",
+          "description": "Provide X-Road services"
+        }
+      ],
+      "iam-admin-service": [
+        {
+          "name": "admin-read",
+          "description": "Read access to admin APIs"
+        },
+        {
+          "name": "admin-write",
+          "description": "Write access to admin APIs"
+        }
+      ],
+      "iam-monitoring-service": [
+        {
+          "name": "monitor-read",
+          "description": "Read monitoring data"
+        },
+        {
+          "name": "monitor-write",
+          "description": "Write monitoring data"
+        },
+        {
+          "name": "alert-manage",
+          "description": "Manage alert rules and incidents"
+        }
+      ],
+      "iam-governance-service": [
+        {
+          "name": "governance-read",
+          "description": "Read governance data"
+        },
+        {
+          "name": "governance-write",
+          "description": "Write governance data"
+        },
+        {
+          "name": "certification-manage",
+          "description": "Manage certification campaigns"
+        }
+      ],
+      "iam-developer-portal": [
+        {
+          "name": "portal-read",
+          "description": "Read developer portal data"
+        },
+        {
+          "name": "app-manage",
+          "description": "Manage registered applications"
+        },
+        {
+          "name": "webhook-manage",
+          "description": "Manage webhook subscriptions"
+        }
+      ],
+      "iam-notification-service": [
+        {
+          "name": "notification-read",
+          "description": "Read notifications"
+        },
+        {
+          "name": "notification-write",
+          "description": "Send notifications"
+        },
+        {
+          "name": "template-manage",
+          "description": "Manage notification templates"
+        }
+      ],
+      "iam-config-service": [
+        {
+          "name": "config-read",
+          "description": "Read platform configuration"
+        },
+        {
+          "name": "config-write",
+          "description": "Write platform configuration"
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "iam-gateway",
+      "name": "IAM API Gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "gateway-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-core-service",
+      "name": "IAM Core Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "core-service-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-tenant-service",
+      "name": "IAM Tenant Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "tenant-service-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-audit-service",
+      "name": "IAM Audit Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "audit-service-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-xroad-adapter",
+      "name": "IAM X-Road Adapter",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "xroad-adapter-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-admin-service",
+      "name": "IAM Admin Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "admin-service-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-monitoring-service",
+      "name": "IAM Monitoring Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "monitoring-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-governance-service",
+      "name": "IAM Governance Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "governance-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-developer-portal",
+      "name": "IAM Developer Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "developer-portal-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-notification-service",
+      "name": "IAM Notification Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "notification-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-config-service",
+      "name": "IAM Config Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "config-service-secret-dev-only",
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    },
+    {
+      "clientId": "iam-web-app",
+      "name": "IAM Web Application",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost:3000/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "http://localhost:3000",
+        "http://localhost:5173"
+      ],
+      "defaultClientScopes": ["openid", "profile", "email", "iam-roles-scope"]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "iam-roles-scope",
+      "description": "IAM Platform roles scope — maps realm and client roles to JWT claims",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "client-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "group-membership-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups"
+          }
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "name": "Platform Administrators",
+      "realmRoles": ["iam-admin", "api-access"]
+    },
+    {
+      "name": "Config Administrators",
+      "realmRoles": ["config-admin", "internal-user", "api-access"]
+    },
+    {
+      "name": "Operations Team",
+      "realmRoles": ["ops-admin", "internal-user", "api-access"]
+    },
+    {
+      "name": "Governance Team",
+      "realmRoles": ["governance-admin", "internal-user", "api-access"]
+    },
+    {
+      "name": "Internal Staff",
+      "realmRoles": ["internal-user", "api-access"],
+      "subGroups": [
+        {
+          "name": "Tax Collection",
+          "realmRoles": []
+        },
+        {
+          "name": "Tax Audit",
+          "realmRoles": []
+        },
+        {
+          "name": "IT Department",
+          "realmRoles": []
+        }
+      ]
+    },
+    {
+      "name": "External Users",
+      "realmRoles": ["external-user", "api-access"],
+      "subGroups": [
+        {
+          "name": "Citizens",
+          "realmRoles": []
+        },
+        {
+          "name": "Partners",
+          "realmRoles": []
+        }
+      ]
+    },
+    {
+      "name": "Auditors",
+      "realmRoles": ["auditor", "report-viewer", "internal-user", "api-access"]
+    },
+    {
+      "name": "Sector Admins",
+      "realmRoles": ["sector-admin", "internal-user", "api-access"]
+    },
+    {
+      "name": "Service Managers",
+      "realmRoles": ["service-manager", "api-access"]
+    },
+    {
+      "name": "Developers",
+      "realmRoles": ["developer", "api-access"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin-user",
+      "email": "admin@iam-platform.local",
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Platform Administrators"]
+    },
+    {
+      "username": "tax.officer",
+      "email": "tax.officer@iam-platform.local",
+      "firstName": "Tax",
+      "lastName": "Officer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TaxOfficer@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Internal Staff/Tax Collection"]
+    },
+    {
+      "username": "auditor.user",
+      "email": "auditor@iam-platform.local",
+      "firstName": "Audit",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Auditor@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Auditors"]
+    },
+    {
+      "username": "citizen.user",
+      "email": "citizen@iam-platform.local",
+      "firstName": "Citizen",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Citizen@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["External Users/Citizens"]
+    },
+    {
+      "username": "partner.user",
+      "email": "partner@iam-platform.local",
+      "firstName": "Partner",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Partner@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["External Users/Partners"]
+    },
+    {
+      "username": "config.admin",
+      "email": "config.admin@iam-platform.local",
+      "firstName": "Config",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ConfigAdmin@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Config Administrators"]
+    },
+    {
+      "username": "ops.admin",
+      "email": "ops.admin@iam-platform.local",
+      "firstName": "Operations",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "OpsAdmin@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Operations Team"]
+    },
+    {
+      "username": "gov.admin",
+      "email": "gov.admin@iam-platform.local",
+      "firstName": "Governance",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "GovAdmin@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Governance Team"]
+    },
+    {
+      "username": "dev.user",
+      "email": "dev@iam-platform.local",
+      "firstName": "Developer",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevUser@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Developers"]
+    },
+    {
+      "username": "report.viewer",
+      "email": "report.viewer@iam-platform.local",
+      "firstName": "Report",
+      "lastName": "Viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ReportViewer@2026",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["report-viewer", "internal-user", "api-access"]
+    },
+    {
+      "username": "sector.admin",
+      "email": "sector.admin@iam-platform.local",
+      "firstName": "Sector",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "SectorAdmin@2026",
+          "temporary": false
+        }
+      ],
+      "groups": ["Sector Admins"],
+      "attributes": {
+        "memberClass": ["GOV"]
+      }
+    }
+  ]
+}
