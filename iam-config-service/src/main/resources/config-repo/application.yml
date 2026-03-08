@@ -1,0 +1,28 @@
+# Shared configuration properties served by Spring Cloud Config Server
+# All client services pulling from config server will receive these defaults
+
+app:
+  platform:
+    name: RikReay IAM Platform
+    version: 1.0.0
+    country: KH
+    instance: Cambodia
+
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+      - http://localhost:3000
+      - http://localhost:5173
+
+  security:
+    jwt:
+      issuer-realm: iam-platform
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
