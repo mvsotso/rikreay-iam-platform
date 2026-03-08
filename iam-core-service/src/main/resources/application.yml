@@ -52,7 +52,7 @@ management:
         liveness:
           include: livenessState
         readiness:
-          include: readinessState,db,keycloak
+          include: readinessState,db
   health:
     livenessstate:
       enabled: true
