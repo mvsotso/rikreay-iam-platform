@@ -20,6 +20,18 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .headers(headers -> headers
+                .contentTypeOptions(contentType -> {})
+                .frameOptions(frame -> frame.mode(
+                    org.springframework.security.web.server.header.XFrameOptionsServerHttpHeadersWriter.Mode.DENY))
+                .hsts(hsts -> hsts
+                    .includeSubdomains(true)
+                    .maxAge(java.time.Duration.ofDays(365)))
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; frame-ancestors 'none'"))
+                .referrerPolicy(referrer -> referrer
+                    .policy(org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+            )
             .authorizeExchange(exchanges -> exchanges
                 // Actuator endpoints
                 .pathMatchers("/actuator/**").permitAll()

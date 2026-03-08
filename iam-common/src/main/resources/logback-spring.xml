@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="iam-platform"/>
+
+    <!-- Console appender — human-readable for dev -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-}] [%X{userId:-}] [%X{tenantId:-}] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- JSON appender — structured logging for production (ELK/Kibana) -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>tenantId</includeMdcKeyName>
+            <includeMdcKeyName>service</includeMdcKeyName>
+            <includeMdcKeyName>clientIp</includeMdcKeyName>
+            <customFields>{"application":"${appName}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- DEV profile: human-readable console -->
+    <springProfile name="dev,test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.iam.platform" level="DEBUG"/>
+    </springProfile>
+
+    <!-- UAT profile: JSON structured -->
+    <springProfile name="uat">
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+        </root>
+        <logger name="com.iam.platform" level="INFO"/>
+    </springProfile>
+
+    <!-- PROD profile: JSON structured, WARN root, INFO app -->
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="JSON"/>
+        </root>
+        <logger name="com.iam.platform" level="INFO"/>
+    </springProfile>
+
+    <!-- Default (no profile): human-readable -->
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

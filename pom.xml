@@ -40,6 +40,7 @@
         <keycloak-admin-client.version>26.5.5</keycloak-admin-client.version>
         <springdoc.version>2.8.0</springdoc.version>
         <flyway.version>11.8.2</flyway.version>
+        <logstash-logback.version>8.0</logstash-logback.version>
     </properties>
 
     <dependencyManagement>
@@ -84,6 +85,13 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
                 <version>${flyway.version}</version>
+            </dependency>
+
+            <!-- Logstash Logback Encoder (structured JSON logging) -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback.version}</version>
             </dependency>
 
             <!-- Internal module -->

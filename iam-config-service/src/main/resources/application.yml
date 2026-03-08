@@ -49,6 +49,18 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
   metrics:
     tags:
       application: ${spring.application.name}

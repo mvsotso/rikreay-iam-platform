@@ -24,6 +24,14 @@ spring:
       default-filters:
         - RemoveRequestHeader=Cookie
         - AddRequestHeader=X-Request-Id, ${random.uuid}
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter:
+              replenishRate: 10
+              burstCapacity: 20
+              requestedTokens: 1
+            key-resolver: "#{@roleBasedKeyResolver}"
+            deny-empty-key: false
       globalcors:
         cors-configurations:
           '[/**]':
@@ -247,7 +255,21 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,redis
     gateway:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    redis:
       enabled: true
   metrics:
     tags:
