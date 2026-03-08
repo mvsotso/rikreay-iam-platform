@@ -450,3 +450,14 @@ echo url="https://www.duckdns.org/update?domains=rikreay&token=YOUR_TOKEN&ip=" |
 - Do NOT use `@Where` annotation — deprecated in Hibernate 6.3+, use `@SQLRestriction` instead
 - Do NOT add `spring-boot-starter-web` to iam-gateway — it's reactive (WebFlux), this causes conflicts
 - Do NOT use `springdoc-openapi-starter-webmvc-ui` in iam-gateway — use `springdoc-openapi-starter-webflux-ui`
+
+## Documentation References
+
+| Document | Path | Description |
+|----------|------|-------------|
+| README | `README.md` | Architecture overview, quick start, test users |
+| CLAUDE.md | `CLAUDE.md` | Claude Code instructions, key decisions, conventions |
+| RBAC Quick Reference | `docs/RBAC_QUICK_REFERENCE.md` | Complete endpoint-to-role mapping for all services |
+| Development Guide | `docs/DEVELOPMENT_GUIDE_FINAL.md` | 22-phase build guide |
+| Architecture Handoff | `docs/HANDOFF.md` | Architecture decisions and handoff notes |
+| Technical Document | `docs/TECHNICAL_DOCUMENT.md` | Detailed technical specification |
