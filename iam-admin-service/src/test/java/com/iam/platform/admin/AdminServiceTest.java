@@ -24,6 +24,6 @@ class AdminServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.totalOrgs()).isGreaterThanOrEqualTo(0);
-        assertThat(response.orgsByMemberClass()).isNotNull();
+        assertThat(response.orgsBySector()).isNotNull();
     }
 }

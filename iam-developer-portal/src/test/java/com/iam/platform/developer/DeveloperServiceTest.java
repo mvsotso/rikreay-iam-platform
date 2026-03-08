@@ -109,7 +109,7 @@ class DeveloperServiceTest {
 
         webhookService.deleteWebhook(id, "dev-user");
 
-        assertThat(config.getDeleted()).isTrue();
+        assertThat(config.isDeleted()).isTrue();
         assertThat(config.getDeletedAt()).isNotNull();
         verify(webhookRepository).save(config);
     }

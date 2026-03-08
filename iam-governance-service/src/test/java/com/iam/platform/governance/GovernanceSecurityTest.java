@@ -77,7 +77,7 @@ class GovernanceSecurityTest {
                         .with(JwtTestUtils.jwtWithRoles("citizen", "external-user"))
                         .contentType("application/json")
                         .content("{\"dataSubjectId\":\"sub-1\",\"purpose\":\"MARKETING\",\"dataSubjectType\":\"NATURAL_PERSON\",\"legalBasis\":\"CONSENT\",\"consentMethod\":\"WEB_FORM\",\"dataCategories\":[\"name\"]}"))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -85,7 +85,7 @@ class GovernanceSecurityTest {
     void myConsentsAuthenticated() throws Exception {
         mockMvc.perform(get("/api/v1/governance/consents/me")
                         .with(JwtTestUtils.jwtWithRoles("citizen", "external-user")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     @Test

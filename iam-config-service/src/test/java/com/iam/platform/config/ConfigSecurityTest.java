@@ -80,7 +80,7 @@ class ConfigSecurityTest {
         // Will get 500 or similar due to missing data, but NOT 401/403
         mockMvc.perform(post("/api/v1/config/rollback/1")
                         .with(JwtTestUtils.jwtWithRoles("admin", "config-admin")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     @Test

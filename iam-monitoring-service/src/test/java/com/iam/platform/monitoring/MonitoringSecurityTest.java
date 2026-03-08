@@ -64,7 +64,7 @@ class MonitoringSecurityTest {
     void authAnalyticsTenantAdmin() throws Exception {
         mockMvc.perform(get("/api/v1/monitoring/auth-analytics/tenant/test-tenant")
                         .with(JwtTestUtils.jwtWithRoles("org-admin", "tenant-admin")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -80,7 +80,7 @@ class MonitoringSecurityTest {
     void xroadMetricsServiceManager() throws Exception {
         mockMvc.perform(get("/api/v1/monitoring/xroad-metrics")
                         .with(JwtTestUtils.jwtWithRoles("svc", "service-manager")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     @Test

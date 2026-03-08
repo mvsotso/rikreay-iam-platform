@@ -59,7 +59,7 @@ class AdminSecurityTest {
     void orgDashboardTenantAdmin() throws Exception {
         mockMvc.perform(get("/api/v1/platform-admin/org/dashboard")
                         .with(JwtTestUtils.jwtWithRoles("org-admin", "tenant-admin")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     // Sector endpoints — sector-admin only
@@ -76,7 +76,7 @@ class AdminSecurityTest {
     void sectorDashboardSectorAdmin() throws Exception {
         mockMvc.perform(get("/api/v1/platform-admin/sector/dashboard")
                         .with(JwtTestUtils.jwtWithRoles("sector", "sector-admin")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     // Bulk import — iam-admin only
@@ -97,7 +97,7 @@ class AdminSecurityTest {
                         .with(JwtTestUtils.jwtWithRoles("admin", "iam-admin"))
                         .contentType("application/json")
                         .content("[]"))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     // User list — iam-admin OR tenant-admin
@@ -114,7 +114,7 @@ class AdminSecurityTest {
     void userListTenantAdmin() throws Exception {
         mockMvc.perform(get("/api/v1/platform-admin/users")
                         .with(JwtTestUtils.jwtWithRoles("org-admin", "tenant-admin")))
-                .andExpect(status().is(s -> s != 401 && s != 403));
+                .andExpect(status().isOk());
     }
 
     // Uses /platform-admin/ path not /admin/
@@ -128,7 +128,7 @@ class AdminSecurityTest {
         // Ensure /admin/ path does NOT exist
         mockMvc.perform(get("/api/v1/admin/platform/dashboard")
                         .with(JwtTestUtils.jwtWithRoles("admin", "iam-admin")))
-                .andExpect(status().is(s -> s == 401 || s == 404));
+                .andExpect(status().isNotFound());
     }
 
     @Test

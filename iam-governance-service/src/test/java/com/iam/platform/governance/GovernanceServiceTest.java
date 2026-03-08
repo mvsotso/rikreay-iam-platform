@@ -87,15 +87,16 @@ class GovernanceServiceTest {
     @DisplayName("Create SoD policy should detect conflicting roles")
     void createSodPolicy() {
         SodPolicyRequest request = new SodPolicyRequest(
-                "Finance SoD", "Prevent finance conflicts",
+                "Finance SoD",
                 List.of(List.of("iam-admin", "auditor")),
-                PolicySeverity.HIGH);
+                PolicySeverity.HIGH,
+                true);
 
         SodPolicy saved = SodPolicy.builder()
                 .name("Finance SoD")
-                .description("Prevent finance conflicts")
                 .conflictingRolesJson(List.of(List.of("iam-admin", "auditor")))
                 .severity(PolicySeverity.HIGH)
+                .enabled(true)
                 .build();
 
         when(sodPolicyRepository.save(any())).thenReturn(saved);
