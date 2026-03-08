@@ -1,0 +1,27 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL}/realms/iam-platform
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      ssl:
+        enabled: true
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: ${CORS_ORIGINS}
+
+server:
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+
+logging:
+  level:
+    root: WARN
+    com.iam.platform: INFO

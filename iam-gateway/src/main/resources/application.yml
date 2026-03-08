@@ -1,0 +1,260 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: iam-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import: optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:8888
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:iam-platform}
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/${KEYCLOAK_REALM:iam-platform}/protocol/openid-connect/certs
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:redis_secret_2026}
+  cloud:
+    gateway:
+      default-filters:
+        - RemoveRequestHeader=Cookie
+        - AddRequestHeader=X-Request-Id, ${random.uuid}
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:4200
+              - http://localhost:3000
+              - http://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - X-Road-Client
+              - X-Road-Id
+              - X-Road-UserId
+              - X-Road-Request-Hash
+            allowCredentials: true
+            maxAge: 3600
+
+      # -----------------------------------------------------------------------
+      # Routes — all services
+      # -----------------------------------------------------------------------
+      routes:
+        # Core Service (:8082)
+        - id: core-service-users
+          uri: ${CORE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coreService
+                fallbackUri: forward:/fallback/unavailable
+        - id: core-service-persons
+          uri: ${CORE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/persons/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coreService
+                fallbackUri: forward:/fallback/unavailable
+        - id: core-service-entities
+          uri: ${CORE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/entities/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coreService
+                fallbackUri: forward:/fallback/unavailable
+        - id: core-service-representations
+          uri: ${CORE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/representations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coreService
+                fallbackUri: forward:/fallback/unavailable
+        - id: core-service-xroad
+          uri: ${CORE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/xroad/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: coreService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Tenant Service (:8083)
+        - id: tenant-service
+          uri: ${TENANT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/tenants/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: tenantService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Audit Service (:8084)
+        - id: audit-service
+          uri: ${AUDIT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/audit/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auditService
+                fallbackUri: forward:/fallback/unavailable
+
+        # X-Road Adapter (:8085)
+        - id: xroad-adapter
+          uri: ${XROAD_ADAPTER_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/xroad/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: xroadAdapter
+                fallbackUri: forward:/fallback/unavailable
+
+        # Admin Service (:8086) — uses /api/v1/platform-admin/** (NOT /api/v1/admin/**)
+        - id: admin-service
+          uri: ${ADMIN_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/platform-admin/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: adminService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Monitoring Service (:8087)
+        - id: monitoring-service
+          uri: ${MONITORING_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/v1/monitoring/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: monitoringService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Governance Service (:8088)
+        - id: governance-service
+          uri: ${GOVERNANCE_SERVICE_URL:http://localhost:8088}
+          predicates:
+            - Path=/api/v1/governance/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: governanceService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Developer Portal (:8089)
+        - id: developer-portal-apps
+          uri: ${DEVELOPER_PORTAL_URL:http://localhost:8089}
+          predicates:
+            - Path=/api/v1/apps/**,/api/v1/docs/**,/api/v1/webhooks/**,/api/v1/sandbox/**,/api/v1/sdks/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: developerPortal
+                fallbackUri: forward:/fallback/unavailable
+
+        # Notification Service (:8090)
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8090}
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Config Service (:8888)
+        - id: config-service
+          uri: ${CONFIG_SERVICE_URL:http://localhost:8888}
+          predicates:
+            - Path=/api/v1/config/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: configService
+                fallbackUri: forward:/fallback/unavailable
+
+        # Keycloak (:8080)
+        - id: keycloak
+          uri: ${KEYCLOAK_URL:http://localhost:8080}
+          predicates:
+            - Path=/auth/**
+
+# Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+    instances:
+      coreService:
+        base-config: default
+      tenantService:
+        base-config: default
+      auditService:
+        base-config: default
+      xroadAdapter:
+        base-config: default
+      adminService:
+        base-config: default
+      monitoringService:
+        base-config: default
+      governanceService:
+        base-config: default
+      developerPortal:
+        base-config: default
+      notificationService:
+        base-config: default
+      configService:
+        base-config: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: when_authorized
+    gateway:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    root: INFO
+    com.iam.platform: DEBUG
+    org.springframework.cloud.gateway: INFO
