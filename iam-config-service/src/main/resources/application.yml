@@ -5,12 +5,14 @@ spring:
   application:
     name: iam-config-service
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:native,dev}
+    active: native
+    include:
+      - ${SPRING_PROFILES_ACTIVE:dev}
   cloud:
     config:
       server:
         native:
-          search-locations: classpath:/config-repo
+          search-locations: classpath:/config-repo/
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/iam_config
     username: ${POSTGRES_USER:iam_admin}
