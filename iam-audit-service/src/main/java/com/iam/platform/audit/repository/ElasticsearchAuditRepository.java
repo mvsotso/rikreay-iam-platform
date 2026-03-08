@@ -21,7 +21,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.json.JsonData;
+
 
 /**
  * Elasticsearch repository for indexing and querying audit events.
@@ -77,12 +77,12 @@ public class ElasticsearchAuditRepository {
             boolBuilder.filter(QueryBuilders.term(t -> t.field("memberClass").value(memberClass)));
         }
         if (from != null || to != null) {
-            boolBuilder.filter(QueryBuilders.range(r -> {
-                var range = r.field("timestamp");
-                if (from != null) range.gte(JsonData.of(from.toString()));
-                if (to != null) range.lte(JsonData.of(to.toString()));
-                return range;
-            }));
+            boolBuilder.filter(QueryBuilders.range(r -> r.date(d -> {
+                d.field("timestamp");
+                if (from != null) d.gte(from.toString());
+                if (to != null) d.lte(to.toString());
+                return d;
+            })));
         }
 
         NativeQuery query = NativeQuery.builder()
@@ -118,12 +118,12 @@ public class ElasticsearchAuditRepository {
             boolBuilder.filter(QueryBuilders.term(t -> t.field("memberClass").value(memberClass)));
         }
         if (from != null || to != null) {
-            boolBuilder.filter(QueryBuilders.range(r -> {
-                var range = r.field("timestamp");
-                if (from != null) range.gte(JsonData.of(from.toString()));
-                if (to != null) range.lte(JsonData.of(to.toString()));
-                return range;
-            }));
+            boolBuilder.filter(QueryBuilders.range(r -> r.date(d -> {
+                d.field("timestamp");
+                if (from != null) d.gte(from.toString());
+                if (to != null) d.lte(to.toString());
+                return d;
+            })));
         }
 
         NativeQuery query = NativeQuery.builder()
@@ -164,12 +164,12 @@ public class ElasticsearchAuditRepository {
             boolBuilder.filter(QueryBuilders.term(t -> t.field("success").value(successOnly)));
         }
         if (from != null || to != null) {
-            boolBuilder.filter(QueryBuilders.range(r -> {
-                var range = r.field("timestamp");
-                if (from != null) range.gte(JsonData.of(from.toString()));
-                if (to != null) range.lte(JsonData.of(to.toString()));
-                return range;
-            }));
+            boolBuilder.filter(QueryBuilders.range(r -> r.date(d -> {
+                d.field("timestamp");
+                if (from != null) d.gte(from.toString());
+                if (to != null) d.lte(to.toString());
+                return d;
+            })));
         }
 
         NativeQuery query = NativeQuery.builder()
