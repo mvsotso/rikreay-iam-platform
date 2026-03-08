@@ -1,0 +1,35 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iam_notification
+    username: iam_admin
+    password: iam_secret_2026
+  kafka:
+    bootstrap-servers: localhost:9092
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/iam-platform
+  mail:
+    host: localhost
+    port: 1025
+
+telegram:
+  bot:
+    token: disabled
+    enabled: false
+
+sms:
+  gateway:
+    enabled: false
+
+logging:
+  level:
+    com.iam.platform: DEBUG
+    org.springframework.security: DEBUG

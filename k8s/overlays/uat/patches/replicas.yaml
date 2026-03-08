@@ -78,6 +78,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: iam-notification-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-notification-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: iam-config-service
 spec:
   replicas: 1

@@ -22,6 +22,9 @@ resources:
   - xroad-adapter/hpa.yaml
   - config-service/deployment.yaml
   - config-service/service.yaml
+  - notification-service/deployment.yaml
+  - notification-service/service.yaml
+  - notification-service/hpa.yaml
   - keycloak/statefulset.yaml
   - keycloak/service.yaml
 

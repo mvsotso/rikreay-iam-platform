@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-notification-service
+  labels:
+    app: iam-notification-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iam-notification-service
+  template:
+    metadata:
+      labels:
+        app: iam-notification-service
+    spec:
+      containers:
+        - name: iam-notification-service
+          image: rikreay/iam-notification-service:latest
+          ports:
+            - containerPort: 8090
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "iam-config-service"
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-password
+            - name: KEYCLOAK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: keycloak-url
+            - name: KAFKA_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: kafka-servers
+            - name: MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: mail-host
+                  optional: true
+            - name: MAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: mail-port
+                  optional: true
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: iam-notification-secrets
+                  key: mail-username
+                  optional: true
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-notification-secrets
+                  key: mail-password
+                  optional: true
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: iam-notification-secrets
+                  key: telegram-bot-token
+                  optional: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 10
