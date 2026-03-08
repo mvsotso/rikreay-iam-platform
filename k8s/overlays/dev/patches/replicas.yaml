@@ -134,6 +134,21 @@ spec:
               value: "dev"
 ---
 apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-governance-service
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-governance-service
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: keycloak

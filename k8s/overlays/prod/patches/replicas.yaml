@@ -188,6 +188,27 @@ spec:
               value: "prod"
 ---
 apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-governance-service
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: iam-governance-service
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: keycloak

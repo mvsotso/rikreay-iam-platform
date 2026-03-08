@@ -31,6 +31,9 @@ resources:
   - monitoring-service/deployment.yaml
   - monitoring-service/service.yaml
   - monitoring-service/hpa.yaml
+  - governance-service/deployment.yaml
+  - governance-service/service.yaml
+  - governance-service/hpa.yaml
   - keycloak/statefulset.yaml
   - keycloak/service.yaml
 

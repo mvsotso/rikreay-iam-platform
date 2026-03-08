@@ -130,3 +130,17 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "uat"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-governance-service
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: iam-governance-service
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "uat"
