@@ -2,8 +2,8 @@ package com.iam.platform.tenant.workflow;
 
 import com.iam.platform.tenant.dto.CreateTenantRequest;
 import com.iam.platform.tenant.dto.TenantResponse;
-import com.iam.platform.tenant.enums.EntityType;
-import com.iam.platform.tenant.enums.MemberClass;
+import com.iam.platform.common.enums.EntityType;
+import com.iam.platform.common.enums.MemberClass;
 import com.iam.platform.tenant.enums.TenantStatus;
 import com.iam.platform.tenant.repository.TenantRepository;
 import com.iam.platform.tenant.service.AuditService;
