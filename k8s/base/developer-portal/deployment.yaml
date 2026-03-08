@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-developer-portal
+  labels:
+    app: iam-developer-portal
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iam-developer-portal
+  template:
+    metadata:
+      labels:
+        app: iam-developer-portal
+    spec:
+      containers:
+        - name: iam-developer-portal
+          image: rikreay/iam-developer-portal:latest
+          ports:
+            - containerPort: 8089
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "iam-config-service"
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: postgres-password
+            - name: KEYCLOAK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: keycloak-url
+            - name: KAFKA_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: iam-platform-config
+                  key: kafka-servers
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: keycloak-admin-client-id
+                  optional: true
+            - name: KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: keycloak-admin-username
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iam-platform-secrets
+                  key: keycloak-admin-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8089
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8089
+            initialDelaySeconds: 30
+            periodSeconds: 10

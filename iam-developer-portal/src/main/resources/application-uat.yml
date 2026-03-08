@@ -1,0 +1,30 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:5432/iam_developer
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM:iam-platform}
+
+keycloak:
+  admin:
+    server-url: ${KEYCLOAK_URL}
+    realm: master
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID}
+    username: ${KEYCLOAK_ADMIN_USERNAME}
+    password: ${KEYCLOAK_ADMIN_PASSWORD}
+
+logging:
+  level:
+    root: INFO
+    com.iam.platform: INFO

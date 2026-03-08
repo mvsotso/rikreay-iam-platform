@@ -34,6 +34,9 @@ resources:
   - governance-service/deployment.yaml
   - governance-service/service.yaml
   - governance-service/hpa.yaml
+  - developer-portal/deployment.yaml
+  - developer-portal/service.yaml
+  - developer-portal/hpa.yaml
   - keycloak/statefulset.yaml
   - keycloak/service.yaml
 

@@ -149,6 +149,21 @@ spec:
               value: "dev"
 ---
 apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-developer-portal
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: iam-developer-portal
+          resources: {}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+---
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: keycloak

@@ -1,0 +1,31 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iam_developer
+    username: iam_admin
+    password: iam_secret_2026
+  kafka:
+    bootstrap-servers: localhost:9092
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/iam-platform
+
+keycloak:
+  admin:
+    server-url: http://localhost:8080
+    realm: master
+    client-id: admin-cli
+    username: admin
+    password: admin
+
+logging:
+  level:
+    com.iam.platform: DEBUG
+    org.springframework.security: DEBUG
