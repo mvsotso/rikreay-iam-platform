@@ -1,4 +1,11 @@
 spring:
+  profiles:
+    active: native,dev
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config-repo/
   jpa:
     hibernate:
       ddl-auto: update
