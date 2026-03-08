@@ -1,0 +1,52 @@
+version: "3.9"
+
+# =============================================================================
+# UAT Environment Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.uat.yml --env-file .env.uat up -d
+# =============================================================================
+# UAT runs on Google Cloud VM (Singapore) or Cambodia DC.
+# All secrets from .env.uat file (NOT checked into git).
+# Nginx reverse proxy with Let's Encrypt TLS on rikreay-uat.duckdns.org
+# =============================================================================
+
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  keycloak:
+    environment:
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: rikreay-uat.duckdns.org
+      KC_HOSTNAME_PATH: /auth
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+    ports: []
+
+  redis:
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports: []
+
+  kafka:
+    ports:
+      - "29092:29092"
+
+  elasticsearch:
+    ports: []
+
+  kibana:
+    ports: []
+
+  prometheus:
+    ports: []
+
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: https://rikreay-uat.duckdns.org/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    ports: []

@@ -1,0 +1,63 @@
+version: "3.9"
+
+# =============================================================================
+# X-Road Overlay — Development/Testing X-Road Infrastructure
+# Usage: docker compose -f docker-compose.yml -f docker-compose.xroad.yml --profile xroad up -d
+# =============================================================================
+
+services:
+  xroad-central-server:
+    image: niis/xroad-central-server:7.4.2
+    container_name: iam-xroad-central
+    profiles: ["xroad"]
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - iam-network
+    restart: unless-stopped
+
+  xroad-ss-provider:
+    image: niis/xroad-security-server:7.4.2
+    container_name: iam-xroad-ss-provider
+    profiles: ["xroad"]
+    ports:
+      - "4001:4000"
+      - "8443:8443"
+    depends_on:
+      xroad-central-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - iam-network
+    restart: unless-stopped
+
+  xroad-ss-consumer:
+    image: niis/xroad-security-server:7.4.2
+    container_name: iam-xroad-ss-consumer
+    profiles: ["xroad"]
+    ports:
+      - "4002:4000"
+      - "8444:8443"
+    depends_on:
+      xroad-central-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - iam-network
+    restart: unless-stopped
