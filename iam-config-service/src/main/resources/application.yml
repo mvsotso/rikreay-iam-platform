@@ -5,9 +5,8 @@ spring:
   application:
     name: iam-config-service
   profiles:
-    active: native
     include:
-      - ${SPRING_PROFILES_ACTIVE:dev}
+      - native
   cloud:
     config:
       server:

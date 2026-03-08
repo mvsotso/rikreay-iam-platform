@@ -1,9 +1,4 @@
 spring:
-  cloud:
-    config:
-      server:
-        native:
-          search-locations: classpath:/config-repo/
   jpa:
     hibernate:
       ddl-auto: update
