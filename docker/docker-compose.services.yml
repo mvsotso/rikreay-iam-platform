@@ -1,48 +1,80 @@
 version: "3.9"
 
-# Service containers — builds and runs all 6 core services
-# Usage: docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
+# =============================================================================
+# Service containers — builds and runs all 12 services
+# =============================================================================
+# Usage:
+#   All core + expansion:
+#     docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
+#
+#   Config service only (bootstrap):
+#     docker compose -f docker-compose.yml -f docker-compose.services.yml --profile config up -d
+#
+#   Expansion services only:
+#     docker compose -f docker-compose.yml -f docker-compose.services.yml --profile expansion up -d
+#
+#   Everything:
+#     docker compose -f docker-compose.yml -f docker-compose.services.yml --profile all up -d
+# =============================================================================
 
 services:
+
+  # ---------------------------------------------------------------------------
+  # Config Service (MUST START FIRST — all other services pull config from it)
+  # ---------------------------------------------------------------------------
   iam-config-service:
     build:
       context: ..
       dockerfile: iam-config-service/Dockerfile
     container_name: iam-config-service
+    profiles: ["config", "all"]
     ports:
       - "8888:8888"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       POSTGRES_HOST: postgres
-      POSTGRES_USER: iam_admin
-      POSTGRES_PASSWORD: iam_secret_2026
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
       KAFKA_SERVERS: kafka:29092
     networks:
       - iam-network
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8888/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Core Services (6)
+  # ---------------------------------------------------------------------------
   iam-gateway:
     build:
       context: ..
       dockerfile: iam-gateway/Dockerfile
     container_name: iam-gateway
+    profiles: ["all"]
     ports:
       - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONFIG_SERVER_HOST: iam-config-service
       KEYCLOAK_URL: http://keycloak:8080
       REDIS_HOST: redis
-      REDIS_PASSWORD: redis_secret_2026
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secret_2026}
     networks:
       - iam-network
     depends_on:
-      - iam-config-service
-      - keycloak
-      - redis
+      iam-config-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   iam-core-service:
@@ -50,14 +82,15 @@ services:
       context: ..
       dockerfile: iam-core-service/Dockerfile
     container_name: iam-core-service
+    profiles: ["all"]
     ports:
       - "8082:8082"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONFIG_SERVER_HOST: iam-config-service
       POSTGRES_HOST: postgres
-      POSTGRES_USER: iam_admin
-      POSTGRES_PASSWORD: iam_secret_2026
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
       KEYCLOAK_URL: http://keycloak:8080
       KAFKA_SERVERS: kafka:29092
     networks:
@@ -65,9 +98,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      - iam-config-service
-      - keycloak
-      - kafka
+      iam-config-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
 
   iam-tenant-service:
@@ -75,26 +111,30 @@ services:
       context: ..
       dockerfile: iam-tenant-service/Dockerfile
     container_name: iam-tenant-service
+    profiles: ["all"]
     ports:
       - "8083:8083"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONFIG_SERVER_HOST: iam-config-service
       POSTGRES_HOST: postgres
-      POSTGRES_USER: iam_admin
-      POSTGRES_PASSWORD: iam_secret_2026
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
       KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_ADMIN_USERNAME: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KAFKA_SERVERS: kafka:29092
     networks:
       - iam-network
     depends_on:
       postgres:
         condition: service_healthy
-      - iam-config-service
-      - keycloak
-      - kafka
+      iam-config-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
 
   iam-audit-service:
@@ -102,14 +142,15 @@ services:
       context: ..
       dockerfile: iam-audit-service/Dockerfile
     container_name: iam-audit-service
+    profiles: ["all"]
     ports:
       - "8084:8084"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONFIG_SERVER_HOST: iam-config-service
       POSTGRES_HOST: postgres
-      POSTGRES_USER: iam_admin
-      POSTGRES_PASSWORD: iam_secret_2026
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
       KEYCLOAK_URL: http://keycloak:8080
       KAFKA_SERVERS: kafka:29092
       ELASTICSEARCH_URL: http://elasticsearch:9200
@@ -118,9 +159,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      - iam-config-service
-      - kafka
-      - elasticsearch
+      iam-config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     restart: unless-stopped
 
   iam-xroad-adapter:
@@ -128,27 +172,189 @@ services:
       context: ..
       dockerfile: iam-xroad-adapter/Dockerfile
     container_name: iam-xroad-adapter
+    profiles: ["all"]
     ports:
       - "8085:8085"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONFIG_SERVER_HOST: iam-config-service
       POSTGRES_HOST: postgres
-      POSTGRES_USER: iam_admin
-      POSTGRES_PASSWORD: iam_secret_2026
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
       KEYCLOAK_URL: http://keycloak:8080
       KAFKA_SERVERS: kafka:29092
       REDIS_HOST: redis
-      REDIS_PASSWORD: redis_secret_2026
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secret_2026}
       CORE_SERVICE_URL: http://iam-core-service:8082
     networks:
       - iam-network
     depends_on:
       postgres:
         condition: service_healthy
-      - iam-config-service
-      - redis
-      - kafka
+      iam-config-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Expansion Services (6)
+  # ---------------------------------------------------------------------------
+  iam-notification-service:
+    build:
+      context: ..
+      dockerfile: iam-notification-service/Dockerfile
+    container_name: iam-notification-service
+    profiles: ["expansion", "all"]
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_SERVERS: kafka:29092
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      iam-config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    restart: unless-stopped
+
+  iam-admin-service:
+    build:
+      context: ..
+      dockerfile: iam-admin-service/Dockerfile
+    container_name: iam-admin-service
+    profiles: ["expansion", "all"]
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      iam-config-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  iam-monitoring-service:
+    build:
+      context: ..
+      dockerfile: iam-monitoring-service/Dockerfile
+    container_name: iam-monitoring-service
+    profiles: ["expansion", "all"]
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_SERVERS: kafka:29092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secret_2026}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      PROMETHEUS_URL: http://prometheus:9090
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      iam-config-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  iam-governance-service:
+    build:
+      context: ..
+      dockerfile: iam-governance-service/Dockerfile
+    container_name: iam-governance-service
+    profiles: ["expansion", "all"]
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      iam-config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  iam-developer-portal:
+    build:
+      context: ..
+      dockerfile: iam-developer-portal/Dockerfile
+    container_name: iam-developer-portal
+    profiles: ["expansion", "all"]
+    ports:
+      - "8089:8089"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONFIG_SERVER_HOST: iam-config-service
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-iam_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iam_secret_2026}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KAFKA_SERVERS: kafka:29092
+    networks:
+      - iam-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      iam-config-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
 
 networks:

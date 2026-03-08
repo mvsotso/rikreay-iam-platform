@@ -22,6 +22,7 @@ resources:
   - xroad-adapter/hpa.yaml
   - config-service/deployment.yaml
   - config-service/service.yaml
+  - config-service/hpa.yaml
   - notification-service/deployment.yaml
   - notification-service/service.yaml
   - notification-service/hpa.yaml

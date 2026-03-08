@@ -16,6 +16,7 @@ spec:
     - host: rikreay.duckdns.org
       http:
         paths:
+          # API Gateway — routes all /api/** requests to services
           - path: /api
             pathType: Prefix
             backend:
@@ -23,6 +24,7 @@ spec:
                 name: iam-gateway
                 port:
                   number: 8081
+          # Keycloak — authentication
           - path: /auth
             pathType: Prefix
             backend:
@@ -30,6 +32,7 @@ spec:
                 name: keycloak
                 port:
                   number: 8080
+          # Swagger UI
           - path: /swagger-ui
             pathType: Prefix
             backend:
@@ -37,3 +40,27 @@ spec:
                 name: iam-gateway
                 port:
                   number: 8081
+          # Developer Portal — public API docs (direct access)
+          - path: /api/v1/docs
+            pathType: Prefix
+            backend:
+              service:
+                name: iam-developer-portal
+                port:
+                  number: 8089
+          # Developer Portal — SDK info (direct access)
+          - path: /api/v1/sdks
+            pathType: Prefix
+            backend:
+              service:
+                name: iam-developer-portal
+                port:
+                  number: 8089
+          # Config Service — native config endpoints (bootstrap)
+          - path: /iam-
+            pathType: Prefix
+            backend:
+              service:
+                name: iam-config-service
+                port:
+                  number: 8888
