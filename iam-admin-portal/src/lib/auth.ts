@@ -47,6 +47,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       accessToken: refreshed.access_token,
       refreshToken: refreshed.refresh_token ?? token.refreshToken,
       expiresAt: Math.floor(Date.now() / 1000) + refreshed.expires_in,
+      roles: extractRoles(refreshed.access_token),
       error: undefined,
     };
   } catch {
@@ -54,9 +55,22 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
   }
 }
 
-function extractRoles(token: Record<string, unknown>): string[] {
+function decodeJwtPayload(token: string): Record<string, unknown> {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const json = Buffer.from(base64, "base64").toString("utf-8");
+    return JSON.parse(json);
+  } catch {
+    return {};
+  }
+}
+
+function extractRoles(accessToken: string | undefined): string[] {
+  if (!accessToken) return [];
+  const payload = decodeJwtPayload(accessToken);
   const roles: string[] = [];
-  const realmAccess = token.realm_access as { roles?: string[] } | undefined;
+  const realmAccess = payload.realm_access as { roles?: string[] } | undefined;
   if (realmAccess?.roles) {
     roles.push(...realmAccess.roles);
   }
@@ -84,7 +98,7 @@ export const authConfig: NextAuthConfig = {
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
           expiresAt: account.expires_at,
-          roles: extractRoles(account as unknown as Record<string, unknown>),
+          roles: extractRoles(account.access_token),
         };
       }
 
