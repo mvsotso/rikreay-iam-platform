@@ -1,0 +1,24 @@
+services:
+  iam-admin-portal:
+    build:
+      context: ../iam-admin-portal
+      dockerfile: Dockerfile
+    container_name: iam-admin-portal
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://iam-gateway:8081
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: change-this-to-a-random-secret-in-production
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/iam-platform
+      KEYCLOAK_CLIENT_ID: iam-web-app
+    depends_on:
+      - keycloak
+    networks:
+      - iam-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

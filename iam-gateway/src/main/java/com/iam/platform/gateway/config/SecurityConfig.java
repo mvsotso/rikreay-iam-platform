@@ -19,6 +19,9 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
+            // CSRF is disabled because this gateway uses stateless JWT authentication.
+            // All state is in the Bearer token, not in cookies, so CSRF attacks are not applicable.
+            // See: OWASP CSRF Prevention Cheat Sheet - Token Based Mitigation
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .headers(headers -> headers
                 .contentTypeOptions(contentType -> {})

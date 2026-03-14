@@ -26,6 +26,13 @@ server:
   ssl:
     enabled: ${SSL_ENABLED:false}
 
+# Disable Swagger/API docs in production
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   level:
     root: WARN
