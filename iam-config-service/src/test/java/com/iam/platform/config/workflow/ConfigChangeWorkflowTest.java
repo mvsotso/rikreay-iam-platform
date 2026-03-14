@@ -84,7 +84,7 @@ class ConfigChangeWorkflowTest {
     void configChangeAndRollbackWorkflow() {
         // Step 1: Record a config change
         ConfigUpdateRequest updateRequest = new ConfigUpdateRequest(
-                Map.of("server.port", 8082, "spring.jpa.show-sql", true));
+                Map.of("server.port", "8082", "spring.jpa.show-sql", "true"));
 
         ConfigChangeLogResponse change = configVersionService.recordChange(
                 "iam-core-service", "dev", updateRequest, "UPDATE");
@@ -146,17 +146,17 @@ class ConfigChangeWorkflowTest {
     void multipleConfigChangesVersioning() {
         ConfigChangeLogResponse v1 = configVersionService.recordChange(
                 "iam-gateway", "prod",
-                new ConfigUpdateRequest(Map.of("rate-limit", 100)),
+                new ConfigUpdateRequest(Map.of("rate-limit", "100")),
                 "UPDATE");
 
         ConfigChangeLogResponse v2 = configVersionService.recordChange(
                 "iam-gateway", "prod",
-                new ConfigUpdateRequest(Map.of("rate-limit", 200)),
+                new ConfigUpdateRequest(Map.of("rate-limit", "200")),
                 "UPDATE");
 
         ConfigChangeLogResponse v3 = configVersionService.recordChange(
                 "iam-gateway", "prod",
-                new ConfigUpdateRequest(Map.of("rate-limit", 300)),
+                new ConfigUpdateRequest(Map.of("rate-limit", "300")),
                 "UPDATE");
 
         // Versions should be sequential
@@ -169,7 +169,7 @@ class ConfigChangeWorkflowTest {
 
         // Rollback to v1
         ConfigChangeLogResponse rollback = configVersionService.rollback(v1.version());
-        assertThat(rollback.changesJson()).containsEntry("rate-limit", 100);
+        assertThat(rollback.changesJson()).containsEntry("rate-limit", "100");
         assertThat(rollback.version()).isGreaterThan(v3.version());
 
         // Verify multiple audit events logged

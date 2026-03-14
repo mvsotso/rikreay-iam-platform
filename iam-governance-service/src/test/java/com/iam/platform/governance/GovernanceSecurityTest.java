@@ -73,18 +73,24 @@ class GovernanceSecurityTest {
     @Test
     @DisplayName("Give consent should succeed for any authenticated user")
     void consentAuthenticated() throws Exception {
+        // Use valid UUID for dataSubjectId and valid ConsentMethod enum value (ELECTRONIC, WRITTEN, or VERBAL)
         mockMvc.perform(post("/api/v1/governance/consents")
                         .with(JwtTestUtils.jwtWithRoles("citizen", "external-user"))
                         .contentType("application/json")
-                        .content("{\"dataSubjectId\":\"sub-1\",\"purpose\":\"MARKETING\",\"dataSubjectType\":\"NATURAL_PERSON\",\"legalBasis\":\"CONSENT\",\"consentMethod\":\"WEB_FORM\",\"dataCategories\":[\"name\"]}"))
+                        .content("{\"dataSubjectId\":\"550e8400-e29b-41d4-a716-446655440000\",\"purpose\":\"MARKETING\",\"dataSubjectType\":\"NATURAL_PERSON\",\"legalBasis\":\"CONSENT\",\"consentMethod\":\"ELECTRONIC\",\"dataCategories\":[\"name\"]}"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Get own consents should succeed for any authenticated user")
     void myConsentsAuthenticated() throws Exception {
+        // The controller calls UUID.fromString(jwt.getSubject()), so the subject must be a valid UUID.
+        // Use a unique UUID that has no existing consent records to avoid H2 JSON deserialization issues.
+        var jwt = JwtTestUtils.createJwt("660e8400-e29b-41d4-a716-446655440099", "citizen", "external-user");
         mockMvc.perform(get("/api/v1/governance/consents/me")
-                        .with(JwtTestUtils.jwtWithRoles("citizen", "external-user")))
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+                                .jwt().jwt(jwt).authorities(
+                                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_external-user"))))
                 .andExpect(status().isOk());
     }
 

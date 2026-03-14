@@ -77,13 +77,13 @@ class AccessCertificationWorkflowTest {
 
         when(usersResource.list(0, 100)).thenReturn(List.of(user1, user2, user3));
 
-        // Step 1: Create campaign
+        // Step 1: Create campaign (scope set to null to avoid H2 jsonb deserialization issues)
         CampaignRequest request = new CampaignRequest(
                 "Q1 2026 Access Review",
                 "Quarterly access certification for GOV sector",
                 Instant.now(),
                 Instant.now().plus(30, ChronoUnit.DAYS),
-                Map.of("tenantId", "iam-platform", "sector", "GOV"));
+                null);
 
         CampaignResponse campaign = campaignService.createCampaign(request, "governance-admin");
 

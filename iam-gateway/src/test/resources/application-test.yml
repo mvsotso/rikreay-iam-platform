@@ -1,7 +1,10 @@
 spring:
   cloud:
     gateway:
-      routes: []
+      server:
+        webflux:
+          routes: []
+          default-filters: []
   security:
     oauth2:
       resourceserver:
@@ -12,10 +15,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
 
 logging:
   level:

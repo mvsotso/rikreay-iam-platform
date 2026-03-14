@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/iam-platform
+
+keycloak:
+  admin:
+    server-url: http://localhost:8080
+    realm: master
+    client-id: admin-cli
+    username: admin
+    password: admin
+
+developer:
+  webhook:
+    max-retries: 3
+    retry-delays: "1000,5000,25000"
+  sandbox:
+    max-per-user: 3
+    expiry-days: 7
+
+app:
+  services:
+    audit-service-url: http://localhost:8084
+
+logging:
+  level:
+    com.iam.platform: DEBUG

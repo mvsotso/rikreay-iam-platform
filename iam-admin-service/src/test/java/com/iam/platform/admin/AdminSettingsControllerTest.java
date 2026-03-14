@@ -1,13 +1,16 @@
 package com.iam.platform.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iam.platform.admin.config.SecurityConfig;
 import com.iam.platform.admin.controller.AdminSettingsController;
 import com.iam.platform.admin.dto.PlatformSettingsRequest;
 import com.iam.platform.admin.dto.PlatformSettingsResponse;
 import com.iam.platform.admin.service.AdminSettingsService;
+import com.iam.platform.common.security.IamSecurityAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminSettingsController.class)
+@Import({SecurityConfig.class, IamSecurityAutoConfiguration.class})
 @ActiveProfiles("test")
 class AdminSettingsControllerTest {
 
