@@ -57,8 +57,12 @@ desktop.ini
 .env
 .env.*
 !.env.example
-!.env.dev
 !.env.*.template
+
+# Docker environment files (may contain secrets)
+docker/.env.dev
+docker/.env.uat
+docker/.env.prod
 
 # Spring Boot
 spring-shell.log
@@ -74,6 +78,11 @@ k8s/overlays/*/secrets/
 
 # Vault tokens
 .vault-token
+
+# Next.js Admin Portal
+iam-admin-portal/node_modules/
+iam-admin-portal/.next/
+iam-admin-portal/.env.local
 
 # Application logs
 logs/
