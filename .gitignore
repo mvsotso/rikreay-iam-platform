@@ -86,3 +86,6 @@ iam-admin-portal/.env.local
 
 # Application logs
 logs/
+
+# Claude Code (local tooling config)
+.claude/
