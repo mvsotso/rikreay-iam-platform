@@ -1,7 +1,8 @@
 package com.iam.platform.monitoring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iam.platform.monitoring.controller.IncidentController;
+import com.iam.platform.common.test.JwtTestUtils;
+import com.iam.platform.common.test.TestConstants;
 import com.iam.platform.monitoring.dto.IncidentRequest;
 import com.iam.platform.monitoring.dto.IncidentResponse;
 import com.iam.platform.monitoring.enums.IncidentStatus;
@@ -9,9 +10,9 @@ import com.iam.platform.monitoring.enums.Severity;
 import com.iam.platform.monitoring.service.IncidentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,13 +23,13 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(IncidentController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class IncidentControllerTest {
 
@@ -42,7 +43,6 @@ class IncidentControllerTest {
     private IncidentService incidentService;
 
     @Test
-    @WithMockUser(roles = "ops-admin")
     void createIncident_asOpsAdmin_shouldSucceed() throws Exception {
         IncidentRequest request = new IncidentRequest(
                 "Gateway Down", Severity.CRITICAL, "Gateway not responding",
@@ -56,7 +56,7 @@ class IncidentControllerTest {
         when(incidentService.createIncident(any(), any())).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/monitoring/incidents")
-                        .with(jwt().jwt(j -> j.claim("preferred_username", "ops-user")))
+                        .with(JwtTestUtils.jwtWithRoles("ops-user", TestConstants.ROLE_OPS_ADMIN))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -64,7 +64,6 @@ class IncidentControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "iam-admin")
     void getIncident_asIamAdmin_shouldSucceed() throws Exception {
         UUID id = UUID.randomUUID();
         IncidentResponse response = new IncidentResponse(
@@ -74,22 +73,23 @@ class IncidentControllerTest {
 
         when(incidentService.getIncident(eq(id))).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/monitoring/incidents/" + id))
+        mockMvc.perform(get("/api/v1/monitoring/incidents/" + id)
+                        .with(JwtTestUtils.jwtWithRoles("admin", TestConstants.ROLE_IAM_ADMIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("DB Slow"));
     }
 
     @Test
-    @WithMockUser(roles = "tenant-admin")
     void listIncidents_asTenantAdmin_shouldBeForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/monitoring/incidents"))
+        mockMvc.perform(get("/api/v1/monitoring/incidents")
+                        .with(JwtTestUtils.jwtWithRoles("tenant-user", TestConstants.ROLE_TENANT_ADMIN)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles = "ops-admin")
     void listIncidents_asOpsAdmin_shouldSucceed() throws Exception {
-        mockMvc.perform(get("/api/v1/monitoring/incidents"))
+        mockMvc.perform(get("/api/v1/monitoring/incidents")
+                        .with(JwtTestUtils.jwtWithRoles("ops-user", TestConstants.ROLE_OPS_ADMIN)))
                 .andExpect(status().isOk());
     }
 }

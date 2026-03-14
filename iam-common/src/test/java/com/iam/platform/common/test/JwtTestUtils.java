@@ -1,7 +1,9 @@
 package com.iam.platform.common.test;
 
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.Instant;
@@ -82,10 +84,16 @@ public final class JwtTestUtils {
 
     /**
      * Creates a RequestPostProcessor for MockMvc with realm roles.
+     * Explicitly sets authorities matching KeycloakJwtAuthenticationConverter output
+     * (ROLE_ prefix + role name) so that hasAnyRole() checks work correctly.
      */
     public static RequestPostProcessor jwtWithRoles(String username, String... roles) {
         Jwt jwt = createJwt("user-id-" + username, username, roles);
-        return SecurityMockMvcRequestPostProcessors.jwt().jwt(jwt);
+        var authorities = Arrays.stream(roles)
+                .map(role -> (org.springframework.security.core.GrantedAuthority)
+                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+        return SecurityMockMvcRequestPostProcessors.jwt().jwt(jwt).authorities(authorities);
     }
 
     /**
@@ -93,5 +101,56 @@ public final class JwtTestUtils {
      */
     public static RequestPostProcessor noAuth() {
         return SecurityMockMvcRequestPostProcessors.anonymous();
+    }
+
+    /**
+     * Mutates a WebTestClient with a mock JWT bearing realm roles.
+     * For use with reactive services (iam-gateway).
+     */
+    public static WebTestClient mutateWithJwt(WebTestClient client, String username, String... roles) {
+        Jwt jwt = createJwt("user-id-" + username, username, roles);
+        return client.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt));
+    }
+
+    /**
+     * Creates an expired JWT for testing token expiry handling.
+     */
+    public static Jwt createExpiredJwt(String subject, String preferredUsername, String... realmRoles) {
+        Map<String, Object> realmAccess = new HashMap<>();
+        realmAccess.put("roles", Arrays.asList(realmRoles));
+
+        return Jwt.withTokenValue("expired-token")
+                .header("alg", "RS256")
+                .header("typ", "JWT")
+                .subject(subject)
+                .claim("preferred_username", preferredUsername)
+                .claim("realm_access", realmAccess)
+                .claim("resource_access", Map.of())
+                .issuedAt(Instant.now().minusSeconds(7200))
+                .expiresAt(Instant.now().minusSeconds(3600))
+                .issuer("http://localhost:8080/realms/iam-platform")
+                .build();
+    }
+
+    /**
+     * Creates a JWT with a tenant (realm) claim for multi-tenant testing.
+     */
+    public static Jwt createJwtWithTenantClaim(String subject, String preferredUsername,
+                                                  String tenantRealm, String... realmRoles) {
+        Map<String, Object> realmAccess = new HashMap<>();
+        realmAccess.put("roles", Arrays.asList(realmRoles));
+
+        return Jwt.withTokenValue("mock-token")
+                .header("alg", "RS256")
+                .header("typ", "JWT")
+                .subject(subject)
+                .claim("preferred_username", preferredUsername)
+                .claim("realm_access", realmAccess)
+                .claim("resource_access", Map.of())
+                .claim("azp", tenantRealm)
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .issuer("http://localhost:8080/realms/" + tenantRealm)
+                .build();
     }
 }

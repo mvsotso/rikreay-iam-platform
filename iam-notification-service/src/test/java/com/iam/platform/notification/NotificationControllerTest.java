@@ -11,7 +11,10 @@ import com.iam.platform.notification.service.NotificationDispatcher;
 import com.iam.platform.notification.service.TemplateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.iam.platform.common.security.IamSecurityAutoConfiguration;
+import com.iam.platform.notification.config.SecurityConfig;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NotificationController.class)
+@Import({SecurityConfig.class, IamSecurityAutoConfiguration.class})
 @ActiveProfiles("test")
 class NotificationControllerTest {
 

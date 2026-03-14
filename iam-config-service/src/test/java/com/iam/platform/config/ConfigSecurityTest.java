@@ -75,12 +75,13 @@ class ConfigSecurityTest {
     }
 
     @Test
-    @DisplayName("Config rollback should succeed for config-admin")
+    @DisplayName("Config rollback should not be forbidden for config-admin")
     void configRollbackConfigAdmin() throws Exception {
         // Will get 500 or similar due to missing data, but NOT 401/403
-        mockMvc.perform(post("/api/v1/config/rollback/1")
+        int statusCode = mockMvc.perform(post("/api/v1/config/rollback/1")
                         .with(JwtTestUtils.jwtWithRoles("admin", "config-admin")))
-                .andExpect(status().isOk());
+                .andReturn().getResponse().getStatus();
+        org.assertj.core.api.Assertions.assertThat(statusCode).isNotIn(401, 403);
     }
 
     @Test

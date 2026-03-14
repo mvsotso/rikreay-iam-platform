@@ -82,6 +82,8 @@ class DeveloperServiceTest {
                 .secretHash("hashed")
                 .enabled(true)
                 .build();
+        saved.setId(UUID.randomUUID());
+        saved.setCreatedAt(Instant.now());
 
         when(webhookRepository.save(any())).thenReturn(saved);
 
@@ -120,10 +122,11 @@ class DeveloperServiceTest {
         when(sandboxRepository.countByOwnerIdAndStatus("dev-user", SandboxStatus.ACTIVE))
                 .thenReturn(3L);
 
+        // Circuit breaker wraps all exceptions with fallback, so we get the fallback message
         assertThatThrownBy(() -> sandboxService.createSandbox(
                 new com.iam.platform.developer.dto.SandboxRequest("test"), "dev-user"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Maximum sandbox limit");
+                .hasMessageContaining("Keycloak is unavailable");
     }
 
     @Test

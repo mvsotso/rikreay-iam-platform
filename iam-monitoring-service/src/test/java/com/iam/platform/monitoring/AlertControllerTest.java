@@ -1,16 +1,17 @@
 package com.iam.platform.monitoring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iam.platform.monitoring.controller.AlertController;
+import com.iam.platform.common.test.JwtTestUtils;
+import com.iam.platform.common.test.TestConstants;
 import com.iam.platform.monitoring.dto.AlertRuleRequest;
 import com.iam.platform.monitoring.dto.AlertRuleResponse;
 import com.iam.platform.monitoring.enums.ChannelType;
 import com.iam.platform.monitoring.service.AlertService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,13 +21,13 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AlertController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AlertControllerTest {
 
@@ -40,7 +41,6 @@ class AlertControllerTest {
     private AlertService alertService;
 
     @Test
-    @WithMockUser(roles = "ops-admin")
     void createAlertRule_asOpsAdmin_shouldSucceed() throws Exception {
         AlertRuleRequest request = new AlertRuleRequest(
                 "Gateway Down Alert", "SERVICE_DOWN", "1",
@@ -53,7 +53,7 @@ class AlertControllerTest {
         when(alertService.createAlertRule(any(), any())).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/monitoring/alerts")
-                        .with(jwt().jwt(j -> j.claim("preferred_username", "ops-user")))
+                        .with(JwtTestUtils.jwtWithRoles("ops-user", TestConstants.ROLE_OPS_ADMIN))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -61,16 +61,16 @@ class AlertControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "tenant-admin")
     void listAlerts_asTenantAdmin_shouldBeForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/monitoring/alerts"))
+        mockMvc.perform(get("/api/v1/monitoring/alerts")
+                        .with(JwtTestUtils.jwtWithRoles("tenant-user", TestConstants.ROLE_TENANT_ADMIN)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles = "iam-admin")
     void listAlerts_asIamAdmin_shouldSucceed() throws Exception {
-        mockMvc.perform(get("/api/v1/monitoring/alerts"))
+        mockMvc.perform(get("/api/v1/monitoring/alerts")
+                        .with(JwtTestUtils.jwtWithRoles("admin", TestConstants.ROLE_IAM_ADMIN)))
                 .andExpect(status().isOk());
     }
 }

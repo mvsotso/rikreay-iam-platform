@@ -43,17 +43,35 @@ jobs:
       - name: Build all modules
         run: mvn clean compile -DskipTests -q
 
-      - name: Run tests
+      - name: Run unit tests
         run: mvn test -q
         env:
           SPRING_PROFILES_ACTIVE: test
+
+      - name: Run integration tests
+        run: mvn failsafe:integration-test failsafe:verify -q
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Generate JaCoCo coverage reports
+        run: mvn jacoco:report -q
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: '**/target/site/jacoco/'
+          retention-days: 14
 
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: '**/target/surefire-reports/'
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
           retention-days: 7
 
   docker:
